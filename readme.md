@@ -3,6 +3,7 @@
 Basically I've configured the layout in a way that basically works for me. I have a 4x12 rev6_drop layout.
 
 Description of the layers:
+
 0. default layer, no real configuration outside of the modifier layers. escape is to the right of the spacebars.
 1. numpad, same num row but under 789 is 4561230 as per regular numpads. have some weirder chars mapped in this layer too - things like tilde / backtick / pipe
 2. function layer, this allows access to f1-12, delete, page up page down, hjkl, some other chars that i use a tonne (=-?`]) 
