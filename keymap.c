@@ -580,11 +580,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
         [1] = LAYOUT_ortho_4x12(TO(0), KC_1, KC_2, KC_3, KC_4, KC_5, KC_6, KC_7, KC_8, KC_9, KC_0, KC_BSPC, 
 
-                                      KC_TRNS, RESET, KC_R, KC_S, KC_T, KC_D, KC_H, KC_4, KC_5, KC_6, KC_MINS, KC_ENT, 
+                                      KC_TRNS, KC_GRV, KC_TILD, KC_PIPE, KC_T, KC_D, KC_H, KC_4, KC_5, KC_6, KC_MINS, KC_ENT, 
 
                                       KC_LSFT, KC_Z, KC_EXLM, KC_C, KC_V, KC_B, KC_K, KC_1, KC_2,KC_3, KC_PLUS, KC_EQL, 
 
-                                       KC_LCTL, KC_LGUI, KC_LALT, TT(1), KC_SPC, KC_SPC, KC_SPC, KC_ESC, KC_0, KC_PAST, KC_PSLS, KC_SLSH),
+                                       KC_LCTL, KC_LGUI, KC_LALT, TT(1), KC_SPC, KC_SPC, KC_SPC, KC_ESC, KC_0,KC_DOT , KC_PAST, KC_SLSH),
 
         [2] = LAYOUT_ortho_4x12(TO(0), KC_F1, KC_F2, KC_F3, KC_F4, KC_F5, KC_F6, KC_F7, KC_F8, KC_F9, KC_F10, KC_BSPC, 
 
@@ -622,7 +622,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                  KC_LSFT, KC_A, KC_S, KC_D, KC_F, KC_G, KC_H, KC_J, KC_K, KC_L, KC_QUOT, KC_ENT,
 
                                   KC_LCTL, KC_Z, KC_X, KC_C, KC_V, KC_B, KC_SPC,KC_ESC, TT(3), TT(3), TT(4), TO(0)),
-        [7] = LAYOUT_ortho_4x12(TO(0), KC_EXLM,KC_MS_U, KC_HASH,KC_TRNS, KC_PGUP, KC_PGUP, KC_AMPR, KC_ASTR, KC_LPRN, KC_HOME, KC_END, 
+        [7] = LAYOUT_ortho_4x12(TO(0), RESET,KC_MS_U, KC_HASH,KC_TRNS, KC_PGUP, KC_PGUP, KC_AMPR, KC_ASTR, KC_LPRN, KC_HOME, KC_END, 
 
                                  KC_TRNS, KC_MS_L, KC_MS_D, KC_MS_R, KC_WH_L, KC_WH_U,KC_WH_R, KC_DOWN, KC_UP, KC_RGHT, KC_RCBR, KC_PIPE,
 
@@ -651,6 +651,7 @@ const uint16_t PROGMEM cv_combo[] = {KC_C, KC_V, COMBO_END};
 const uint16_t PROGMEM semi_combo[] = {KC_L, KC_QUOT, COMBO_END};
 const uint16_t PROGMEM vb_combo[] = {KC_V, KC_B, COMBO_END};
 const uint16_t PROGMEM cs_combo[] = {KC_TAB, KC_BSPC, COMBO_END};
+const uint16_t PROGMEM admin_combo[] = {KC_LCTL,KC_SLSH , COMBO_END};
 
 combo_t key_combos[COMBO_COUNT] = {
     COMBO(qw_combo, KC_EXLM),
@@ -667,6 +668,7 @@ combo_t key_combos[COMBO_COUNT] = {
     COMBO(semi_combo, KC_COLN ),
     COMBO(vb_combo, KC_PLUS),
     COMBO(cs_combo, TO(6)),
+    COMBO(admin_combo, TO(7))
 };
 
 

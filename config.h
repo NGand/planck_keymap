@@ -69,5 +69,5 @@
 #define L_GUI_HELD (get_mods() & (MOD_BIT(KC_LGUI)))
 #define R_GUI_HELD (get_mods() & (MOD_BIT(KC_RGUI)))
 #define GUI_HELD (L_GUI_HELD || R_GUI_HELD)
-#define COMBO_COUNT 14
+#define COMBO_COUNT 15
 #define  COMBO_TERM 20
