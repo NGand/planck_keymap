@@ -51,11 +51,11 @@
 
 #define TAPPING_TOGGLE 1
 #define TAPPING_TERM 125     
-#define MOUSEKEY_TIME_TO_MAX 5
+#define MOUSEKEY_TIME_TO_MAX 15
 #define MOUSEKEY_DELTA 10
 #define MOUSEKEY_INTERVAL 16
 #define MOUSEKEY_DELAY 150
-#define MOUSEKEY_MAX_SPEED 3
+#define MOUSEKEY_MAX_SPEED 9
 
 #define GUITAB LGUI(KC_TAB)
 //#define ALT_AA RALT_T(SWE_AA)
@@ -69,5 +69,7 @@
 #define L_GUI_HELD (get_mods() & (MOD_BIT(KC_LGUI)))
 #define R_GUI_HELD (get_mods() & (MOD_BIT(KC_RGUI)))
 #define GUI_HELD (L_GUI_HELD || R_GUI_HELD)
-#define COMBO_COUNT 15
+#define COMBO_COUNT 16
 #define  COMBO_TERM 20
+
+

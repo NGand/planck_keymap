@@ -73,10 +73,31 @@ char      savedcmd[CMDBUFFSIZE];
 int       currsavesize = 0;
 uint16_t  saved_keycodes[SAVEBUFFSIZE];
 bool      saved_shiftstate[SAVEBUFFSIZE];
+bool      ismac = false;
 
 // If REPEAT_MODE (user used .)
 // just insert everything from buffer, then go back to command mode
 // else go insert mode
+void word_hold(void) {
+	if (ismac)
+		HOLD_ALT;
+	else
+		HOLD_CTRL;
+	return;
+}
+
+void word_unhold(void) {
+	if (ismac)
+		UNHOLD_ALT;
+	else
+		UNHOLD_CTRL;
+	return;
+}
+
+
+
+
+
 void go_insert_mode(void) {
   if(currmode == REPEAT_MODE) { 
     for(int i = 0; i < currsavesize; i++) {
@@ -118,6 +139,13 @@ void mod_type(uint16_t modcode, uint16_t keycode) {
   mod_type_num(modcode, keycode, 1);
 }
 
+void mod_os(uint16_t keycode){
+	if (ismac)
+            mod_type(GUI, keycode);
+	else
+            mod_type(CTRL, keycode);
+	return;
+}
 int get_prev_num(void) {
   int val = 0;
   int dec = 1;
@@ -176,7 +204,7 @@ bool handle_cmd(char last_char, char prev_char, int num) {
         case 'y':
           mod_type_num(SHIFT, direction, num);
           if (prev_char == 'y') {
-            mod_type(CTRL, KC_C);
+            mod_os( KC_C);
             tap_code(KC_LEFT);
             tap_code(KC_RIGHT);
           }
@@ -198,18 +226,18 @@ bool handle_cmd(char last_char, char prev_char, int num) {
         case 'd':
         case 'c':
         case 'y':
-          HOLD_CTRL;
+          word_hold();
           HOLD_SHIFT;
           tap_code_num(KC_RIGHT, num);
           // e vs w, going one further and then back again works in both word and
           // mac apps. Will not work well if this is the last word in the document however
 
-          UNHOLD_CTRL;
+          word_unhold();
           UNHOLD_SHIFT;
 
           // yw, ye, copy
           if (prev_char == 'y') {
-            mod_type(CTRL, KC_C);
+	    mod_os(KC_C);
             tap_code(KC_LEFT);
             tap_code(KC_RIGHT);
           } else {
@@ -221,7 +249,7 @@ bool handle_cmd(char last_char, char prev_char, int num) {
 
           // :w is save
           if (prev_char == ';' && last_char == 'w' && num == 1) {
-            mod_type(CTRL, KC_S);
+            mod_os(KC_S);
           }
           return true;
 
@@ -251,12 +279,12 @@ bool handle_cmd(char last_char, char prev_char, int num) {
       return true;
 
     case '/':
-      mod_type(CTRL, KC_F);
+      mod_os( KC_F);
       go_insert_mode();
       return true;
 
     case 'u':
-      mod_type(CTRL, KC_Z);
+      mod_os( KC_Z);
       return true;
 
     case 'o':
@@ -276,12 +304,12 @@ bool handle_cmd(char last_char, char prev_char, int num) {
       return true;
 
     case 'I':
-      mod_type(CTRL, KC_LEFT);
+      mod_os( KC_LEFT);
       go_insert_mode();
       return true;
 
     case 'A':
-      mod_type(CTRL, KC_RIGHT);
+      mod_os( KC_RIGHT);
       go_insert_mode();
       break;
 
@@ -293,26 +321,26 @@ bool handle_cmd(char last_char, char prev_char, int num) {
       return true;
 
     case 'p':
-      mod_type(CTRL, KC_V);
+      mod_os( KC_V);
       return true;
 
     case 'n':
-      mod_type(CTRL, KC_G);
+      mod_os( KC_G);
       return true;
 
     // This is a special case. In vi(m) p either pastes a new line or at the cursor depending
     // on what's in the paste buffer. I can't do that. So p and \ (button right of p) acts
     // as these two cases
     case '\\':
-      mod_type(CTRL, KC_END);
+      mod_os( KC_END);
       tap_code(KC_ENT);
-      mod_type(CTRL, KC_V);
+      mod_os( KC_V);
       return true;
 
     case 'q':
       // :q is save
       if (prev_char == ';' && num == 1) {
-        mod_type(CTRL, KC_Q);
+        mod_os( KC_W);
       }
       return true;
 
@@ -355,14 +383,14 @@ bool handle_cmd(char last_char, char prev_char, int num) {
         case 'y':
           tap_code(KC_HOME);
           mod_type_num(SHIFT, KC_END, num);
-          mod_type(CTRL, KC_C);
+          mod_os( KC_C);
           tap_code(KC_RIGHT);
           tap_code(KC_LEFT);
           return true;
         default:
           if(visual_mode) {
             visual_mode = false;
-            mod_type(CTRL, KC_C);
+            mod_os( KC_C);
             tap_code(KC_LEFT);
             return true;
           }
@@ -401,7 +429,7 @@ bool handle_cmd(char last_char, char prev_char, int num) {
         case 'y':
           mod_type(SHIFT, KC_HOME);
           if (prev_char == 'y') {
-            mod_type(CTRL, KC_C);
+            mod_os( KC_C);
             tap_code(KC_LEFT);
             tap_code(KC_RIGHT);
             tap_code(KC_LEFT);
@@ -426,20 +454,20 @@ bool handle_cmd(char last_char, char prev_char, int num) {
     case 'G':
       if(prev_char == 'd' || prev_char == 'x' || prev_char == 'X' || prev_char == 'c' || prev_char == 'y') {
         HOLD_SHIFT;
-        mod_type(CTRL, KC_END);
+        mod_os( KC_END);
         UNHOLD_SHIFT;
         if (prev_char == 'c' || prev_char == 'd')
           tap_code(KC_DEL);
         if (prev_char == 'c')
           go_insert_mode();
         if (prev_char == 'y') {
-          mod_type(CTRL, KC_C);
+          mod_os( KC_C);
           tap_code(KC_LEFT);
           tap_code(KC_RIGHT);
         }
       } else {
         if(visual_mode) HOLD_SHIFT;
-        mod_type(CTRL, KC_END);
+        mod_os( KC_END);
         if(visual_mode) UNHOLD_SHIFT;
       }
       return true;
@@ -449,20 +477,20 @@ bool handle_cmd(char last_char, char prev_char, int num) {
         char ch2 = get_2nd_prev_char();
         if(ch2 == 'd' || ch2 == 'x' || ch2 == 'X' || ch2 == 'c' || ch2 == 'y') {
           HOLD_SHIFT;
-          mod_type(CTRL, KC_HOME);
+          mod_os( KC_HOME);
           UNHOLD_SHIFT;
           if (ch2 == 'c' || ch2 == 'd')
             tap_code(KC_DEL);
           if (ch2 == 'c')
             go_insert_mode();
           if (ch2 == 'y') {
-            mod_type(CTRL, KC_C);
+            mod_os( KC_C);
             tap_code(KC_RIGHT);
             tap_code(KC_LEFT);
           }
         } else {
           if(visual_mode) HOLD_SHIFT;
-          mod_type(CTRL, KC_HOME);
+          mod_os( KC_HOME);
           if(visual_mode) UNHOLD_SHIFT;
         }
       }
@@ -616,25 +644,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
          TO(0), KC_NO, KC_NO, VIM_NUM, KC_V, KC_NO, KC_NO, KC_N, KC_M, KC_NO, KC_NO, KC_NO),
 
         [6] = LAYOUT_ortho_4x12(KC_ESC,KC_1, KC_2, KC_3, KC_4, KC_5, KC_6, KC_7, KC_8, KC_9, KC_0, KC_BSPC, 
-
                                 KC_TAB, KC_Q, KC_W, KC_E, KC_R, KC_T, KC_Y, KC_U, KC_I, KC_O, KC_P, KC_BSPC, 
-
                                  KC_LSFT, KC_A, KC_S, KC_D, KC_F, KC_G, KC_H, KC_J, KC_K, KC_L, KC_QUOT, KC_ENT,
-
                                   KC_LCTL, KC_Z, KC_X, KC_C, KC_V, KC_B, KC_SPC,KC_ESC, TT(3), TT(3), TT(4), TO(0)),
-        [7] = LAYOUT_ortho_4x12(TO(0), RESET,KC_MS_U, KC_HASH,KC_TRNS, KC_PGUP, KC_PGUP, KC_AMPR, KC_ASTR, KC_LPRN, KC_HOME, KC_END, 
-
+        [7] = LAYOUT_ortho_4x12(TO(0), RESET,KC_MS_U, KC_MS_D,KC_TRNS, KC_PGUP, KC_PGUP, KC_AMPR, KC_ASTR, KC_LPRN, KC_HOME, KC_END, 
                                  KC_TRNS, KC_MS_L, KC_MS_D, KC_MS_R, KC_WH_L, KC_WH_U,KC_WH_R, KC_DOWN, KC_UP, KC_RGHT, KC_RCBR, KC_PIPE,
-
                                   KC_BTN1, KC_ACL0  , KC_ACL1, KC_ACL2, KC_F10, KC_WH_D, KC_VOLU, KC_VOLD, KC_MUTE,KC_MPRV , KC_MNXT, KC_MPLY,
-
                                   KC_LCTL, KC_LGUI, KC_LALT, TT(1), KC_BTN2, KC_SPC, KC_SPC, KC_ESC, TT(3), TT(3), TT(4), KC_SLSH),
 
-
-
 };
-
-
 
 
 const uint16_t PROGMEM qw_combo[] = {KC_Q, KC_W, COMBO_END};
@@ -646,29 +664,31 @@ const uint16_t PROGMEM yu_combo[] = {KC_Y, KC_U, COMBO_END};
 const uint16_t PROGMEM ui_combo[] = {KC_U, KC_I, COMBO_END};
 const uint16_t PROGMEM io_combo[] = {KC_I, KC_O, COMBO_END};
 const uint16_t PROGMEM op_combo[] = {KC_O, KC_P, COMBO_END};
+const uint16_t PROGMEM pd_combo[] = {KC_P, KC_BSPC, COMBO_END};
 const uint16_t PROGMEM caps_combo[] = {KC_LSFT, KC_RSFT, COMBO_END};
 const uint16_t PROGMEM cv_combo[] = {KC_C, KC_V, COMBO_END};
 const uint16_t PROGMEM semi_combo[] = {KC_L, KC_QUOT, COMBO_END};
 const uint16_t PROGMEM vb_combo[] = {KC_V, KC_B, COMBO_END};
 const uint16_t PROGMEM cs_combo[] = {KC_TAB, KC_BSPC, COMBO_END};
-const uint16_t PROGMEM admin_combo[] = {KC_LCTL,KC_SLSH , COMBO_END};
+const uint16_t PROGMEM adm_combo[] = {KC_LCTL,KC_SLSH , COMBO_END};
 
 combo_t key_combos[COMBO_COUNT] = {
-    COMBO(qw_combo, KC_EXLM),
-    COMBO(cv_combo, KC_UNDS),
-    COMBO(we_combo, KC_AT ),
-    COMBO(er_combo, KC_HASH  ),
-    COMBO(rt_combo,  KC_DLR),
-    COMBO(ty_combo,  KC_PERC),
-    COMBO(yu_combo,  KC_CIRC),
-    COMBO(ui_combo,  KC_AMPR),
-    COMBO(io_combo,  KC_ASTR),
-    COMBO(op_combo,  KC_LPRN),
+    COMBO(qw_combo,   KC_EXLM),
+    COMBO(cv_combo,   KC_UNDS),
+    COMBO(we_combo,   KC_AT),
+    COMBO(er_combo,   KC_HASH),
+    COMBO(rt_combo,   KC_DLR),
+    COMBO(ty_combo,   KC_PERC),
+    COMBO(yu_combo,   KC_CIRC),
+    COMBO(ui_combo,   KC_AMPR),
+    COMBO(io_combo,   KC_ASTR),
+    COMBO(op_combo,   KC_LPRN),
+    COMBO(pd_combo,   KC_RPRN),
     COMBO(caps_combo, KC_CAPS ),
     COMBO(semi_combo, KC_COLN ),
-    COMBO(vb_combo, KC_PLUS),
-    COMBO(cs_combo, TO(6)),
-    COMBO(admin_combo, TO(7))
+    COMBO(vb_combo,   KC_PLUS),
+    COMBO(cs_combo,   TO(6)),
+    COMBO(adm_combo,  TO(7))
 };
 
 
@@ -678,36 +698,21 @@ combo_t key_combos[COMBO_COUNT] = {
 
 
 #ifdef AUDIO_ENABLE
-
   float plover_song[][2]     = SONG(PLOVER_SOUND);
-
   float plover_gb_song[][2]  = SONG(PLOVER_GOODBYE_SOUND);
-
   float numpad_song[][2] = SONG(NUM_LOCK_ON_SOUND);
-
 #endif
 
 
-
-
- 
-
 bool muse_mode = false;
-
 uint8_t last_muse_note = 0;
-
 uint16_t muse_counter = 0;
-
 uint8_t muse_offset = 70;
-
 uint16_t muse_tempo = 50;
+
 static uint8_t last_layer_on = 0;
 
- 
-
 layer_state_t layer_state_set_user(layer_state_t state) {
-
-
     if (layer_state_cmp(state,0) && last_layer_on !=0){
           rgblight_setrgb(250, 255,255) ;
           last_layer_on=0;
@@ -719,23 +724,31 @@ layer_state_t layer_state_set_user(layer_state_t state) {
           rgblight_setrgb(0,0,255) ;
           last_layer_on=1;    
     }
+
    if (layer_state_cmp(state,3) && last_layer_on !=3){
           rgblight_setrgb(0,255,0) ;
           last_layer_on=  3;    
           currmode = COMMAND_MODE;
     }
+   
   if (layer_state_cmp(state,4) && last_layer_on !=4){
           rgblight_setrgb( 59,255,0) ;
           last_layer_on= 4;    
     }
+
   if (layer_state_cmp(state,6) && last_layer_on !=6){
           rgblight_setrgb( 0,255,255) ;
           last_layer_on= 6;
           combo_disable();    
     }
-  
 
+if (layer_state_cmp(state,7) && last_layer_on !=7){
+          rgblight_setrgb( 0,0,255) ;
+          last_layer_on= 7;
+          combo_disable();    
+    }
     return state;
+ 
 
 }
 
@@ -801,10 +814,9 @@ bool handle_vim_mode(uint16_t keycode, keyrecord_t *record, uint8_t vim_layer_no
           break;
         case KC_W:
           if(record->event.pressed)
-            HOLD_CTRL;
+            word_hold();
           else
-            UNHOLD_CTRL;
-
+            word_unhold();
           newKey = KC_RIGHT;
           break;
         case KC_E:
@@ -816,9 +828,9 @@ bool handle_vim_mode(uint16_t keycode, keyrecord_t *record, uint8_t vim_layer_no
           break;
         case KC_B:
           if(record->event.pressed)
-            HOLD_CTRL;
+            word_hold();
           else
-            UNHOLD_CTRL;
+            word_unhold();
           newKey = KC_LEFT;
           break;
       }
@@ -830,7 +842,9 @@ bool handle_vim_mode(uint16_t keycode, keyrecord_t *record, uint8_t vim_layer_no
         } else {
           unregister_code(newKey);
           if(keycode == KC_W) {
-            mod_type(CTRL, KC_RIGHT);
+	    word_hold();
+	    register_code(keycode);
+	    word_unhold();
           }
           if(visual_mode)
             UNHOLD_SHIFT;
@@ -887,7 +901,7 @@ bool handle_vim_mode(uint16_t keycode, keyrecord_t *record, uint8_t vim_layer_no
     if (keycode == KC_R) {
       HOLD_SHIFT;
       UNHOLD_CTRL;
-      mod_type(CTRL, KC_Z);
+      mod_os( KC_Z);
       HOLD_CTRL;
       UNHOLD_SHIFT;
       return true;
@@ -923,8 +937,17 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   if (vim_handled){
         return false;
   }
-  
-  return true;
+  if (last_layer_on == 7 && keycode == KC_MS_U) {
+	  ismac = true;
+	  layer_move(0);
+	  return false;
+  }
+  if (last_layer_on == 7 && keycode == KC_MS_D) {
+	  ismac = false;
+	  layer_move(0);
+	  return false;
+  }
+    return true;
 
   }
 
